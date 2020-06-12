@@ -28,9 +28,10 @@ app.layout = html.Div([
     # figures
     html.Div([
         # map
-        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': False}), className='col-8'),
+        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': True}), className='col-8'),
         # TODO polar chart
-        html.Div(html.Div(id="wifi-site-info"), className='col-4')
+        html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': True}), className='col-4'),
+        #html.Div(html.Div(id="wifi-site-info"), className='col-4')
     ], className='row'),
 ], className='container')
 
@@ -51,11 +52,15 @@ def update_graph(selected_day):
 
 # plot Polar Chart
 @app.callback(
-    Output('wifi-site-info', 'children'),
+    Output('paris-wifi-polarBar', 'figure'),
     [Input('paris-wifi-map', 'clickData')])
 def update_wifi_site_selected(clickData):
-    return "#######TODO Polar Chart:####### {}".format(str(clickData))
-
+    if clickData == None:
+        df = [7, 24, 46, 18, 17, 29, 65, 30, 58, 38, 65, 52, 51, 49, 66, 22, 16, 10, 14, 13, 2, 6, 7, 10, 6, 10, 8, 5, 3, 7]
+        return fig.get_fig_polarBar(df)
+    else:
+        df = wd.get_df_period_nb_sess_site(df_full, clickData['points'][0]['customdata'][0])
+        return fig.get_fig_polarBar(df)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

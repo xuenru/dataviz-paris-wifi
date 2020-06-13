@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import pandas as pd
 
 import utils.figure as fig
 import utils.wifi_data as wd
@@ -9,21 +10,21 @@ import utils.wifi_data as wd
 app = dash.Dash(__name__)
 
 df_full = wd.get_df_full()
-df = wd.get_df_nb_sess(df_full)
 
 slider_marks = {str(d): str(d) for d in df_full.session_date.dt.day.unique()}
-slider_marks[0] = 'Full month'
+slider_marks[0] = 'March'
 app.layout = html.Div([
     # Header
     html.H1("Paris WI-FI"),
-    # Silder
+    # Slider
     dcc.Slider(
         id='day-slider',
         min=0,
         max=df_full.session_date.max().day,
         value=0,
         marks=slider_marks,
-        step=None
+        step=None,
+        included=False
     ),
     # figures
     html.Div([
@@ -41,11 +42,12 @@ app.layout = html.Div([
     [Input('day-slider', 'value')])
 def update_graph(selected_day):
     if selected_day == 0:
-        from_date = "2020-03-01"
-        to_date = "2020-03-31"
+        from_date = pd.datetime(2020, 3, 1, 0)
+        to_date = pd.datetime(2020, 3, 31, 23)
     else:
-        from_date = to_date = "2020-03-" + str(selected_day)
-    df = wd.get_df_period_nb_sess(df_full, from_date, to_date)
+        from_date = pd.datetime(2020, 3, selected_day, 0)
+        to_date = pd.datetime(2020, 3, selected_day, 23)
+    df = wd.get_df_period_nb_sess(df_full, from_date, to_date, with_info=True)
     return fig.get_fig_map(df)
 
 

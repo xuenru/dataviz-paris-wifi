@@ -29,10 +29,15 @@ app.layout = html.Div([
     # figures
     html.Div([
         # map
-        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': True}), className='col-8'),
-        # TODO polar chart
-        html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': True}), className='col-4'),
-        #html.Div(html.Div(id="wifi-site-info"), className='col-4')
+        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': False}), className='col-6'),
+        # TODO heatmap
+        html.Div(dcc.Graph(id='paris-wifi-heatmap', config={'displayModeBar': False}), className='col-6'),
+    ], className='row'),
+    html.Div([
+        # polar bar daily
+        html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': False}), className='col-6'),
+        # TODO polar bar hourly
+        html.Div(dcc.Graph(id='paris-wifi-polarBar-hourly', config={'displayModeBar': False}), className='col-6'),
     ], className='row'),
 ], className='container')
 
@@ -57,12 +62,15 @@ def update_graph(selected_day):
     Output('paris-wifi-polarBar', 'figure'),
     [Input('paris-wifi-map', 'clickData')])
 def update_wifi_site_selected(clickData):
-    if clickData == None:
-        df = [7, 24, 46, 18, 17, 29, 65, 30, 58, 38, 65, 52, 51, 49, 66, 22, 16, 10, 14, 13, 2, 6, 7, 10, 6, 10, 8, 5, 3, 7]
-        return fig.get_fig_polarBar(df)
-    else:
-        df = wd.get_df_period_nb_sess_site(df_full, clickData['points'][0]['customdata'][0])
-        return fig.get_fig_polarBar(df)
+    # data of march
+    from_date = pd.datetime(2020, 3, 1, 0)
+    to_date = pd.datetime(2020, 3, 31, 23)
+    site_code = None if clickData is None else clickData['points'][0]['customdata'][0]
+
+    df_daily, df_hourly = wd.get_df_period_nb_sess(df_full, from_date, to_date, site_code=site_code)
+    # TODO hourly
+    return fig.get_fig_polar_bar(df_daily)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

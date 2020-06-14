@@ -68,7 +68,6 @@ def get_fig_polar_bar_hourly(df):
     :param df:
     :return:
     """
-    print(df)
     sess_counts = df.session_count.tolist()
     r, theta = np.mgrid[1:7:33j, 0:(360 / 24 * 23):24j]  #33*24
     # take data of hours

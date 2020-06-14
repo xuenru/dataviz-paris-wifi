@@ -15,7 +15,8 @@ slider_marks = {str(d): str(d) for d in df_full.session_date.dt.day.unique()}
 slider_marks[0] = 'March'
 app.layout = html.Div([
     # Header
-    html.H1("Paris WI-FI"),
+    html.H1("Time-varying Data Visualization"),
+    html.H2("Paris WI-FI"),
     # Slider
     dcc.Slider(
         id='day-slider',
@@ -59,7 +60,8 @@ def update_graph(selected_day):
 
 # plot Polar Chart
 @app.callback(
-    Output('paris-wifi-polarBar', 'figure'),
+    [Output('paris-wifi-polarBar', 'figure'),Output('paris-wifi-polarBar-hourly', 'figure')],
+    #Output('paris-wifi-polarBar', 'figure'),
     [Input('paris-wifi-map', 'clickData')])
 def update_wifi_site_selected(clickData):
     # data of march
@@ -69,7 +71,7 @@ def update_wifi_site_selected(clickData):
 
     df_daily, df_hourly = wd.get_df_period_nb_sess(df_full, from_date, to_date, site_code=site_code)
     # TODO hourly
-    return fig.get_fig_polar_bar(df_daily)
+    return fig.get_fig_polar_bar(df_daily) , fig.get_fig_polar_bar_hourly(df_hourly)
 
 
 if __name__ == '__main__':

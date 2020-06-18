@@ -91,3 +91,22 @@ def get_fig_polar_bar_hourly(df):
     fig.update_layout(polar_bargap=0)
 
     return fig
+
+
+def get_fig_dist(df):
+
+    colors = px.colors.qualitative.Pastel
+    colors.append(px.colors.qualitative.Prism)
+    colors.append(px.colors.qualitative.Safe)
+    fig = go.Figure()
+    for column in df:
+        fig.add_trace(go.Bar(
+            y= df.index,
+            x=df[column],
+            name=column,
+            orientation='h',
+            marker_color=colors[df.columns.get_loc(column)]
+        ))
+    fig.update_yaxes(nticks = 31)
+    fig.update_layout(barmode='stack', xaxis_title = 'Number of connections',yaxis_title = 'Date', height = 800)
+    return fig

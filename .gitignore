@@ -5,3 +5,4 @@ __pycache__
 cache
 config/auth.py
 data/test.csv
+.vscode

@@ -15,7 +15,8 @@ slider_marks = {str(d): str(d) for d in df_full.session_date.dt.day.unique()}
 slider_marks[0] = 'March'
 app.layout = html.Div([
     # Header
-    html.H1("Paris WI-FI"),
+    html.H1("Time-varying Data Visualization"),
+    html.H2("Paris WI-FI"),
     # Slider
     dcc.Slider(
         id='day-slider',
@@ -29,9 +30,15 @@ app.layout = html.Div([
     # figures
     html.Div([
         # map
-        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': False}), className='col-8'),
-        # TODO polar chart
-        html.Div(html.Div(id="wifi-site-info"), className='col-4')
+        html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': False}), className='col-6'),
+        # TODO heatmap
+        html.Div(dcc.Graph(id='paris-wifi-heatmap', config={'displayModeBar': False}), className='col-6'),
+    ], className='row'),
+    html.Div([
+        # polar bar daily
+        html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': False}), className='col-6'),
+        # TODO polar bar hourly
+        html.Div(dcc.Graph(id='paris-wifi-polarBar-hourly', config={'displayModeBar': False}), className='col-6'),
     ], className='row'),
 ], className='container')
 
@@ -53,10 +60,18 @@ def update_graph(selected_day):
 
 # plot Polar Chart
 @app.callback(
-    Output('wifi-site-info', 'children'),
+    [Output('paris-wifi-polarBar', 'figure'),Output('paris-wifi-polarBar-hourly', 'figure')],
+    #Output('paris-wifi-polarBar', 'figure'),
     [Input('paris-wifi-map', 'clickData')])
 def update_wifi_site_selected(clickData):
-    return "#######TODO Polar Chart:####### {}".format(str(clickData))
+    # data of march
+    from_date = pd.datetime(2020, 3, 1, 0)
+    to_date = pd.datetime(2020, 3, 31, 23)
+    site_code = None if clickData is None else clickData['points'][0]['customdata'][0]
+
+    df_daily, df_hourly = wd.get_df_period_nb_sess(df_full, from_date, to_date, site_code=site_code)
+    # TODO hourly
+    return fig.get_fig_polar_bar(df_daily) , fig.get_fig_polar_bar_hourly(df_hourly)
 
 
 if __name__ == '__main__':

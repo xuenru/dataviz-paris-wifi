@@ -11,7 +11,8 @@ import utils.wifi_data as wd
 app = dash.Dash(__name__)
 
 df_full = wd.get_df_full()
-
+tupe_df_dist = tuple(wd.get_df_dist())
+print(type(tupe_df_dist), len(tupe_df_dist))
 slider_marks = {str(d): str(d) for d in df_full.session_date.dt.day.unique()}
 slider_marks[0] = 'March'
 app.layout = html.Div([
@@ -32,14 +33,14 @@ app.layout = html.Div([
     html.Div([
         # map
         html.Div(dcc.Graph(id='paris-wifi-map', config={'displayModeBar': False}), className='col-6'),
-        # TODO heatmap
-        html.Div(dcc.Graph(id='paris-wifi-heatmap', config={'displayModeBar': False}), className='col-6'),
+        # map choropleth
+        html.Div(dcc.Graph(id='paris-wifi-choropleth', config={'displayModeBar': False}), className='col-6'),
     ], className='row'),
     
     html.Div([
         # polar bar daily
         html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': False}), className='col-6'),
-        # TODO polar bar hourly
+        # polar bar hourly
         html.Div(dcc.Graph(id='paris-wifi-polarBar-hourly', config={'displayModeBar': False}), className='col-6'),
     ], className='row'),
     # Device distribution dropdown
@@ -60,7 +61,8 @@ app.layout = html.Div([
 
 # plot Map
 @app.callback(
-    Output('paris-wifi-map', 'figure'),
+    [Output('paris-wifi-map', 'figure'),
+     Output('paris-wifi-choropleth', 'figure')],
     [Input('day-slider', 'value')])
 def update_graph(selected_day):
     if selected_day == 0:
@@ -70,7 +72,9 @@ def update_graph(selected_day):
         from_date = pd.datetime(2020, 3, selected_day, 0)
         to_date = pd.datetime(2020, 3, selected_day, 23)
     df = wd.get_df_period_nb_sess(df_full, from_date, to_date, with_info=True)
-    return fig.get_fig_map(df)
+    df_choropleth = wd.get_df_choropleth(tupe_df_dist[0], from_date, to_date)
+
+    return fig.get_fig_map(df), fig.get_fig_map_choropleth(df_choropleth)
 
 # plot distribution bar chart
 @app.callback(
@@ -82,7 +86,7 @@ def dist_graph(dropdown):
         selected = 1
     elif dropdown == 'CON':
         selected = 2
-    df = wd.get_df_dist()[selected]['count']
+    df = tupe_df_dist[selected]['count']
     return fig.get_fig_dist(df)
 
 # plot Polar Chart
@@ -97,7 +101,6 @@ def update_wifi_site_selected(clickData):
     site_code = None if clickData is None else clickData['points'][0]['customdata'][0]
 
     df_daily, df_hourly = wd.get_df_period_nb_sess(df_full, from_date, to_date, site_code=site_code)
-    # TODO hourly
     return fig.get_fig_polar_bar(df_daily) , fig.get_fig_polar_bar_hourly(df_hourly)
 
 

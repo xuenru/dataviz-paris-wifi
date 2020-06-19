@@ -81,6 +81,7 @@ def get_df_period_nb_sess(df, from_date, to_date, with_info=False, site_code=Non
 
     return get_df_nb_sess_with_info(df_period, site_code) if with_info else get_df_nb_sess(df_period, site_code)
 
+
 def get_df_dist():
     """
     get all the distribution data from csv
@@ -109,3 +110,20 @@ def get_df_dist():
     df_device_mark = df_device_mark.groupby(df_device_mark.index.date).sum().iloc[1:]
     
     return df_postal_code, df_device_type, df_device_mark
+
+
+def get_df_choropleth(df, from_date, to_date):
+    """
+    prepare df for paris district map
+    :param df: DataFrame from get_df_dist()
+    :param from_date: datetime
+    :param to_date: datetime
+    :return: DataFrame
+    """
+    df_period = df.loc[from_date.date():to_date.date()]
+    df_period.columns = [int(p) + 100 for p in df_period.columns.get_level_values(1)]
+
+    df_poste_total = df_period.transpose().sum(1).reset_index()
+    df_poste_total.columns = ['postal_code', 'count']
+
+    return df_poste_total

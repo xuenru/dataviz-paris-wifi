@@ -1,5 +1,5 @@
 ## Group Project of Data Visualisation
-#### Python package requirement
+#### Python packages requirements
 - plotly
 - dash
 - pandas

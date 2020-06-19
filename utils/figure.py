@@ -2,7 +2,7 @@ import plotly.express as px
 import config.auth as config
 import numpy as np
 import plotly.graph_objects as go
-
+import json
 
 def get_fig_map(df):
     """
@@ -15,7 +15,7 @@ def get_fig_map(df):
                             lat='lat',
                             size='session_count',
                             color='session_count',
-                            title='test title',
+                            title='paris wifi map',
                             hover_name='site_name',
                             hover_data=['site_code', 'site_name', 'session_count'],
                             color_continuous_scale=px.colors.carto.Bluyl
@@ -24,6 +24,24 @@ def get_fig_map(df):
     fig.update_layout(
         mapbox={'accesstoken': config.MAP_BOX_TOKEN, 'center': {'lat': 48.853499, 'lon': 2.3493147}, 'zoom': 11},
         margin={'l': 0, 'r': 0, 't': 0, 'b': 0})
+    return fig
+
+
+def get_fig_map_choropleth(df):
+    with open('./data/arrondissements.geojson') as file:
+        geojson_paris = json.load(file)
+    fig = px.choropleth(df,
+                        geojson=geojson_paris,
+                        color="count",
+                        color_continuous_scale=px.colors.carto.Bluyl,
+                        locations="postal_code",
+                        featureidkey="properties.c_arinsee",
+                        projection="mercator",
+                        hover_data=["postal_code", "count"]
+                        )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
     return fig
 
 
@@ -90,4 +108,23 @@ def get_fig_polar_bar_hourly(df):
     )
     fig.update_layout(polar_bargap=0)
 
+    return fig
+
+
+def get_fig_dist(df):
+
+    colors = px.colors.qualitative.Pastel
+    colors.append(px.colors.qualitative.Prism)
+    colors.append(px.colors.qualitative.Safe)
+    fig = go.Figure()
+    for column in df:
+        fig.add_trace(go.Bar(
+            y= df.index,
+            x=df[column],
+            name=column,
+            orientation='h',
+            marker_color=colors[df.columns.get_loc(column)]
+        ))
+    fig.update_yaxes(nticks = 31)
+    fig.update_layout(barmode='stack', xaxis_title = 'Number of connections',yaxis_title = 'Date', height = 800)
     return fig

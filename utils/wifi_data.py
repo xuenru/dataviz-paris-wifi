@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_df_full():
@@ -79,3 +80,50 @@ def get_df_period_nb_sess(df, from_date, to_date, with_info=False, site_code=Non
     df_period = get_df_period(df, from_date, to_date)
 
     return get_df_nb_sess_with_info(df_period, site_code) if with_info else get_df_nb_sess(df_period, site_code)
+
+
+def get_df_dist():
+    """
+    get all the distribution data from csv
+    :return: DataFrame
+    """
+    df = pd.read_csv("./data/paris-wi-fi-utilisation-des-hotspots-paris-wi-fi.csv", sep=";",
+                        usecols=[ "Date heure début","Code postal", "Type d'appareil", "Constructeur appareil"]).dropna()
+    df.columns = ['session_date', 'postal_code', 'device_type', 'device_mark']
+    df.session_date = pd.to_datetime(df.session_date, utc=True)
+    df = df.astype({'session_date': 'datetime64[ns]','postal_code': 'str'})
+    df['postal_code']= df['postal_code'].astype(str)
+
+    df_postal_code = df.drop(columns=['device_type', 'device_mark'])
+    df_postal_code['count'] = 1
+    df_postal_code = pd.DataFrame.pivot_table( df_postal_code, index = 'session_date', columns = ['postal_code'], values = ['count'], aggfunc = np.sum, fill_value=0)
+    df_postal_code = df_postal_code.groupby(df_postal_code.index.date).sum().iloc[1:]
+
+    df_device_type = df.drop(columns=['postal_code', 'device_mark'])
+    df_device_type['count'] = 1
+    df_device_type = pd.DataFrame.pivot_table( df_device_type, index = 'session_date', columns = ['device_type'], values = ['count'], aggfunc = np.sum, fill_value=0)
+    df_device_type = df_device_type.groupby(df_device_type.index.date).sum().iloc[1:]
+
+    df_device_mark = df.drop(columns=['postal_code', 'device_type'])
+    df_device_mark['count'] = 1
+    df_device_mark = pd.DataFrame.pivot_table( df_device_mark, index = 'session_date', columns = ['device_mark'], values = ['count'], aggfunc = np.sum, fill_value=0)
+    df_device_mark = df_device_mark.groupby(df_device_mark.index.date).sum().iloc[1:]
+    
+    return df_postal_code, df_device_type, df_device_mark
+
+
+def get_df_choropleth(df, from_date, to_date):
+    """
+    prepare df for paris district map
+    :param df: DataFrame from get_df_dist()
+    :param from_date: datetime
+    :param to_date: datetime
+    :return: DataFrame
+    """
+    df_period = df.loc[from_date.date():to_date.date()]
+    df_period.columns = [int(p) + 100 for p in df_period.columns.get_level_values(1)]
+
+    df_poste_total = df_period.transpose().sum(1).reset_index()
+    df_poste_total.columns = ['postal_code', 'count']
+
+    return df_poste_total

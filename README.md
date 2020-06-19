@@ -1,7 +1,16 @@
 ## Group Project of Data Visualisation
+#### Python package requirement
+- plotly
+- dash
+- pandas
+- numpy
+- json
 
 #### Configuration
-Rename the file ```auth.py.sample``` to ```auth.py``` in the directory ```config/``` and set ```MAP_BOX_TOKEN``` with your [mapbox](https://www.mapbox.com) token.
+```
+cp config/auth.py.sample config/auth.py
+```
+In ```auth.py``` set ```MAP_BOX_TOKEN``` with your [mapbox](https://www.mapbox.com) token
 
 #### Run the app
 ```

@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 import json
 
+
 def get_fig_map(df):
     """
     get the fig map layout

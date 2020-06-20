@@ -40,7 +40,8 @@ def get_callbacks(app):
     # plot Polar Chart
     @app.callback(
         [Output('paris-wifi-polarBar', 'figure'),
-         Output('paris-wifi-polarBar-hourly', 'figure')],
+         Output('paris-wifi-polarBar-hourly', 'figure'),
+         Output('paris-wifi-3d', 'figure')],
         [Input('paris-wifi-map', 'clickData')])
     def update_wifi_site_selected(clickData):
         # data of march
@@ -49,4 +50,5 @@ def get_callbacks(app):
         site_code = None if clickData is None else clickData['points'][0]['customdata'][0]
 
         df_daily, df_hourly = wd.get_df_period_nb_sess(df_full, from_date, to_date, site_code=site_code)
-        return fig.get_fig_polar_bar(df_daily), fig.get_fig_polar_bar_hourly(df_hourly)
+
+        return fig.get_fig_polar_bar(df_daily), fig.get_fig_polar_bar_hourly(df_hourly), fig.get_fig_3d_plot(df_hourly)

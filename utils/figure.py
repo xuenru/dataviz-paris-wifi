@@ -3,6 +3,7 @@ import config.auth as config
 import numpy as np
 import plotly.graph_objects as go
 import json
+import pandas as pd
 
 
 def get_fig_map(df):
@@ -46,6 +47,29 @@ def get_fig_map_choropleth(df):
     return fig
 
 
+def get_fig_3d_plot(df):
+    df_3d = df.copy()
+    df_3d['date'] = df.index.date
+    df_3d['hour'] = df.index.hour
+    df_3d = pd.DataFrame.pivot_table(df_3d, values='session_count', columns='hour', index='date')
+
+    z = df_3d.values
+    x = df_3d.columns
+    y = df_3d.index
+
+    fig = go.Figure(data=[go.Surface(z=z, x=x, y=y)])
+    fig.update_layout(title='3d plot',
+                      autosize=True,
+                      margin=dict(l=0, r=0, b=0, t=0),
+                      scene=dict(
+                          xaxis_title='hour',
+                          yaxis_title='date',
+                          zaxis_title='session count')
+                      )
+
+    return fig
+
+
 def get_fig_polar_bar(df):
     """
     get the fig polar bar layout
@@ -65,14 +89,11 @@ def get_fig_polar_bar(df):
         theta=theta.ravel(),
         color=color.ravel(),
         title="Radical Weekly Wifi Connection Periodic Viz",
-        labels={1:"cool"},
-        start_angle=360/14,
-
-        #hover_name='site_name',
-        #hover_data=['site_code', 'site_name', 'session_count'],
+        labels={1: "cool"},
+        start_angle=360 / 14,
         color_continuous_scale=[
             "rgb(255, 255, 255)",
-            "#fbe6c5","#f5ba98","#ee8a82","#dc7176","#c8586c","#9c3f5d","#70284a",
+            "#fbe6c5", "#f5ba98", "#ee8a82", "#dc7176", "#c8586c", "#9c3f5d", "#70284a",
         ]  # color from px.colors.carto.Buryl
     )
     fig.update_traces(text=np.mgrid[6.5:7:7j])
@@ -88,9 +109,9 @@ def get_fig_polar_bar_hourly(df):
     :return:
     """
     sess_counts = df.session_count.tolist()
-    r, theta = np.mgrid[1:7:33j, 0:(360 / 24 * 23):24j]  #33*24
+    r, theta = np.mgrid[1:7:33j, 0:(360 / 24 * 23):24j]  # 33*24
     # take data of hours
-    color = sess_counts #24*31
+    color = sess_counts  # 24*31
 
     color = np.asarray(color)
     whitecolor = np.zeros(48, dtype=int)
@@ -104,7 +125,7 @@ def get_fig_polar_bar_hourly(df):
         start_angle=360 / 48,
         color_continuous_scale=[
             "rgb(255, 255, 255)",
-            "#fbe6c5","#f5ba98","#ee8a82","#dc7176","#c8586c","#9c3f5d","#70284a",
+            "#fbe6c5", "#f5ba98", "#ee8a82", "#dc7176", "#c8586c", "#9c3f5d", "#70284a",
         ]  # color from px.colors.carto.Buryl
     )
     fig.update_layout(polar_bargap=0)
@@ -113,19 +134,18 @@ def get_fig_polar_bar_hourly(df):
 
 
 def get_fig_dist(df):
-
     colors = px.colors.qualitative.Pastel
     colors.append(px.colors.qualitative.Prism)
     colors.append(px.colors.qualitative.Safe)
     fig = go.Figure()
     for column in df:
         fig.add_trace(go.Bar(
-            y= df.index,
+            y=df.index,
             x=df[column],
             name=column,
             orientation='h',
             marker_color=colors[df.columns.get_loc(column)]
         ))
-    fig.update_yaxes(nticks = 31)
-    fig.update_layout(barmode='stack', xaxis_title = 'Number of connections',yaxis_title = 'Date', height = 800)
+    fig.update_yaxes(nticks=31)
+    fig.update_layout(barmode='stack', xaxis_title='Number of connections', yaxis_title='Date', height=800)
     return fig

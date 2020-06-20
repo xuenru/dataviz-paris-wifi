@@ -30,6 +30,12 @@ app.layout = html.Div([
         html.Div(dcc.Graph(id='paris-wifi-choropleth', config={'displayModeBar': False}), className='col-6'),
     ], className='row'),
 
+    # 3D Surface Plot
+    html.Div([
+        html.Div(
+            dcc.Graph(id='paris-wifi-3d', config={'displayModeBar': False}), className='col'),
+    ], className='row'),
+
     html.Div([
         # polar bar daily
         html.Div(dcc.Graph(id='paris-wifi-polarBar', config={'displayModeBar': False}), className='col-6'),

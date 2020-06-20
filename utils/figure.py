@@ -77,7 +77,12 @@ def get_fig_polar_bar(df):
     :return:
     """
     sess_counts = df.session_count.tolist()
-    r, theta = np.mgrid[6.5:7:7j, 0:(360 / 7 * 6):7j]
+    # r, _ = np.mgrid[1:7:7j, 0:(360 / 7 * 6):7j]
+    r = np.array([["week " + str(w - 2) for w in range(7)] for h in range(7)]).transpose()
+    theta = np.array(
+        [['Monday'] * 7, ['Tuesday'] * 7, ['Wednesday'] * 7, ['Thursday'] * 7, ['Friday'] * 7, ['Saturday'] * 7,
+         ['Sunday'] * 7]).transpose()
+
     # take data of weeks in march from 03-02 to 03-29
     color = sess_counts[1:29]
     color = np.asarray(color)
@@ -97,7 +102,9 @@ def get_fig_polar_bar(df):
         ]  # color from px.colors.carto.Buryl
     )
     fig.update_traces(text=np.mgrid[6.5:7:7j])
-    fig.update_layout(polar_bargap=0)
+    fig.update_layout(polar_bargap=0,
+                      polar=dict(radialaxis=dict(showticklabels=False))
+                      )
 
     return fig
 
@@ -109,7 +116,8 @@ def get_fig_polar_bar_hourly(df):
     :return:
     """
     sess_counts = df.session_count.tolist()
-    r, theta = np.mgrid[1:7:33j, 0:(360 / 24 * 23):24j]  # 33*24
+    r = np.array([["March " + str(d-1) for d in range(33)] for h in range(24)]).transpose()
+    theta = np.array([[str(h) + "h" for h in range(24)] for d in range(33)])
     # take data of hours
     color = sess_counts  # 24*31
 
@@ -128,7 +136,8 @@ def get_fig_polar_bar_hourly(df):
             "#fbe6c5", "#f5ba98", "#ee8a82", "#dc7176", "#c8586c", "#9c3f5d", "#70284a",
         ]  # color from px.colors.carto.Buryl
     )
-    fig.update_layout(polar_bargap=0)
+    fig.update_layout(polar_bargap=0,
+                      polar=dict(radialaxis=dict(showticklabels=False)))
 
     return fig
 

@@ -49,7 +49,8 @@ app.layout = html.Div([
             {'label': 'Device type', 'value': 'TYP'},
             {'label': 'Device constructer', 'value': 'CON'},
         ],
-        value='TYP'
+        value='TYP',
+        clearable=False
     ),
     html.Div([
         # distribution map

@@ -1,5 +1,4 @@
 import plotly.express as px
-import config.auth as config
 import numpy as np
 import plotly.graph_objects as go
 import json
@@ -20,11 +19,12 @@ def get_fig_map(df):
                             title='paris wifi map',
                             hover_name='site_name',
                             hover_data=['site_code', 'site_name', 'session_count'],
+                            mapbox_style="carto-positron",
                             color_continuous_scale=px.colors.carto.Bluyl
                             )
 
     fig.update_layout(
-        mapbox={'accesstoken': config.MAP_BOX_TOKEN, 'center': {'lat': 48.853499, 'lon': 2.3493147}, 'zoom': 11},
+        mapbox={'center': {'lat': 48.853499, 'lon': 2.3493147}, 'zoom': 11},
         margin={'l': 0, 'r': 0, 't': 0, 'b': 0})
     return fig
 
